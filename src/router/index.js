@@ -18,20 +18,32 @@ export default new Router({
       props: true,
       children: [
         {
+          path: '/admin',
+          name: 'admin',
+          component: resolve => require(['../components/page/Admin.vue'], resolve),
+          meta: { title: '主页' }
+        },
+        {
           path: '/home',
           name: 'home',
-          component: resolve => require(['../components/page/StudentHome.vue'], resolve),
+          component: resolve => require(['../components/page/Home.vue'], resolve),
           meta: { title: '主页' }
         },
         {
           path: '/ccourse',
-          component: resolve => require(['../components/common/StudentCourseFrame.vue'], resolve),
+          component: resolve => require(['../components/common/CourseFrame.vue'], resolve),
           meta: { title: '自述文件' },
           children: [
             {
-              path: '/course/:course',
-              name: 'coursehome',
+              path: '/scourse/:course',
+              name: 'studentcoursehome',
               component: resolve => require(['../components/page/StudentCourseHome.vue'], resolve),
+              meta: { title: '课程主页' }
+            },
+            {
+              path: '/tcourse/:course',
+              name: 'teachercoursehome',
+              component: resolve => require(['../components/page/TeacherCourseHome.vue'], resolve),
               meta: { title: '课程主页' }
             },
             {

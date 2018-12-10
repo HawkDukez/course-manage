@@ -32,16 +32,20 @@
     </div>
     <div class="answer">
       <p class="answer-title">回答：</p>
-      <el-input type="textarea" :autosize="{ minRows: 5}" placeholder="请输入内容" v-model="content"></el-input>
+      <el-input
+        type="textarea"
+        :autosize="{ minRows: 5}"
+        placeholder="请输入内容"
+        v-model="postParams.content"
+      ></el-input>
     </div>
     <div class="button">
       <el-upload
         class="upload-demo"
         ref="upload"
-        action="https://jsonplaceholder.typicode.com/posts/"
-        :on-preview="handlePreview"
-        :on-remove="handleRemove"
+        :action="uploadUrl"
         :file-list="fileList"
+        :data="postParams"
         :auto-upload="false"
       >
         <el-button class="add-file" slot="trigger" size="small">上传附件</el-button>
@@ -53,84 +57,81 @@
 
 <script>
 export default {
-  data () {
+  data() {
     return {
-      assignment_id: this.$route.params.assign_id,
-      content: '',
-      assignmentInfo: {
-        assign_id: '',
-        title: '',
-        content: '',
-        release_time: '',
-        deadline: '',
-        file_id: '',
-        file_name: ''
+      uploadUrl: "/hhh/v1/app/food/recognize",
+      postParams: {
+        action: "post",
+        assign_id: this.$route.params.assign_id,
+        content: ""
       },
-      fileList: [
-        {
-          name: 'food.jpeg',
-          url:
-            'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-        },
-        {
-          name: 'food2.jpeg',
-          url:
-            'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-        }
-      ]
-    }
+      assignmentInfo: {
+        title: "",
+        content: "",
+        release_time: "",
+        deadline: "",
+        file_id: "",
+        file_name: ""
+      },
+      fileList: []
+    };
   },
-  created () {
+  created() {
     // 组件创建完后获取数据，
     // 此时 data 已经被 observed 了
-    this.fetchAssignmentInfo()
+    this.fetchAssignmentInfo();
   },
-  beforeRouteUpdate (to, from, next) {
+  beforeRouteUpdate(to, from, next) {
     // 在当前路由改变，但是该组件被复用时调用
     // 举例来说，对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
     // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
     // 可以访问组件实例 `this`
-    this.fetchAssignmentInfo()
-    next()
+    this.fetchAssignmentInfo();
+    next();
   },
   methods: {
-    back () {
-      this.$router.go(-1)
+    back() {
+      this.$router.go(-1);
     },
-    fetchAssignmentInfo () {
-      this.$http('get', '/assignment/' + this.assignment_id, {
-        ass_id: this.assignment_id
+    fetchAssignmentInfo() {
+      this.$http("get", "/assignment/" + this.postParams.assign_id, {
+        ass_id: this.postParams.assign_id
       }).then(res => {
-        console.log(res)
-        this.assignmentInfo.assign_id = res.data.assign_id
-        this.assignmentInfo.title = res.data.title
-        this.assignmentInfo.content = res.data.content
-        this.assignmentInfo.release_time = res.data.release_time
-        this.assignmentInfo.deadline = res.data.deadline
-        this.assignmentInfo.file_id = res.data.file_id
-        this.assignmentInfo.file_name = res.data.file_name
-      })
+        console.log(res);
+        this.assignmentInfo.title = res.data.title;
+        this.assignmentInfo.content = res.data.content;
+        this.assignmentInfo.release_time = res.data.release_time;
+        this.assignmentInfo.deadline = res.data.deadline;
+        this.assignmentInfo.file_id = res.data.file_id;
+        this.assignmentInfo.file_name = res.data.file_name;
+      });
     },
-    submit () {
-      this.$http('post', '/test_submit', {
-        action: 'post',
-        test_id: this.test_id,
-        content: this.content
-      })
-    },
-    submitUpload () {
-      this.$refs.upload.submit()
-    },
-    // 文件列表移除文件时的钩子
-    handleRemove (file, fileList) {
-      console.log(file, fileList)
-    },
-    // 点击文件列表中已上传的文件时的钩子
-    handlePreview (file) {
-      console.log(file)
+    submitUpload() {
+      this.fileList = this.$refs.upload.uploadFiles;
+      if (this.fileList.length > 0) {
+        this.$refs.upload.submit();
+        this.$message({
+          message: "提交成功",
+          type: "success"
+        });
+        this.postParams.content = "";
+        this.fileList = [];
+      } else if (this.postParams.content !== "") {
+        this.$http("post", "/assign_submit", this.postParams).then(res => {
+          if (res.data.status == 0) {
+            this.$message({
+              message: "提交成功",
+              type: "success"
+            });
+            this.postParams.content = "";
+          }
+        });
+      } else {
+        this.$message.error("真的要交白卷吗？~");
+      }
     }
   }
-}
+};
 </script>
 
 <style scoped>
@@ -147,10 +148,10 @@ export default {
   display: inline-block;
 }
 .file-title,
-.btn-file{
+.btn-file {
   display: inline-block;
 }
-.btn-file{
+.btn-file {
   font-size: 15px;
 }
 .file,

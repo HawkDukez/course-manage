@@ -86,6 +86,9 @@ export default {
       }
     }
   },
+  computed:{
+
+  },
   methods: {
     submitInfo () {
       this.$refs.loginForm.validate(valid => {
@@ -93,23 +96,22 @@ export default {
           this.$http("post", "/login", this.loginForm).then(res => {
             if (res.data.status == 0) {
               if (this.loginForm.group == 3) {
-                this.$router.push('home')
+                this.$router.push({
+                  name: 'home',
+                  params: {
+                    identity: "student"
+                  }
+                })
+                this.$store.commit('Login')
               } else if (this.loginForm.group === 2) {
                 this.$router.push({
-                  path: '/home',
+                  name: 'home',
                   params: {
-                    username: this.loginForm.id,
-                    course: res.date.course,
-                    notice: res.data.notice
+                    identity: "teacher"
                   }
                 })
               } else if (this.loginForm.group === 1) {
-                this.$router.push({
-                  path: '/home',
-                  params: {
-                    username: this.loginForm.id
-                  }
-                })
+                this.$router.push('admin')
               }
             } else {
               this.$message.error('用户名或密码错误')

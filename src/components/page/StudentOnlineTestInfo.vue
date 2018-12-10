@@ -28,21 +28,27 @@
     </div>
     <div class="file">
       <p class="file-title">附件：</p>
+      <!-- <a class='download' href='localhost:8080' download=""  title="下载">下载</a> -->
       <el-button type="text" class="btn-file">{{testInfo.file_name}}</el-button>
     </div>
     <div class="answer">
       <p class="answer-title">回答：</p>
-      <el-input type="textarea" :autosize="{ minRows: 5}" placeholder="请输入内容" v-model="content"></el-input>
+      <el-input
+        type="textarea"
+        :autosize="{ minRows: 5}"
+        placeholder="请输入内容"
+        v-model="postParams.content"
+      ></el-input>
     </div>
     <div class="button">
       <el-upload
         class="upload-demo"
         ref="upload"
-        action="https://jsonplaceholder.typicode.com/posts/"
-        :on-preview="handlePreview"
-        :on-remove="handleRemove"
+        :action="uploadUrl"
         :file-list="fileList"
+        :data="postParams"
         :auto-upload="false"
+        :on-success="handleSuccess"
       >
         <el-button class="add-file" slot="trigger" size="small">上传附件</el-button>
         <el-button class="submit" size="small" @click="submitUpload">提交</el-button>
@@ -53,84 +59,95 @@
 
 <script>
 export default {
-  data () {
+  data() {
     return {
-      test_id: this.$route.params.test_id,
-      testInfo: {
-        test_id: '',
-        title: '',
-        content: '',
-        start_time: '',
-        end_time: '',
-        file_id: '',
-        file_name: ''
+      uploadUrl: "/hhh/v1/app/food/recognize",
+      postParams: {
+        action: "post",
+        test_id: this.$route.params.test_id,
+        content: ""
       },
-      content: '',
-      fileList: [
-        {
-          name: 'food.jpeg',
-          url:
-            'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-        },
-        {
-          name: 'food2.jpeg',
-          url:
-            'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-        }
-      ]
-    }
+      testInfo: {
+        title: "",
+        content: "",
+        start_time: "",
+        end_time: "",
+        file_id: "",
+        file_name: ""
+      },
+      fileList: []
+    };
   },
-  created () {
+  created() {
     // 组件创建完后获取数据，
     // 此时 data 已经被 observed 了
-    this.fetchTestInfo()
+    this.fetchTestInfo();
   },
-  beforeRouteUpdate (to, from, next) {
+  beforeRouteUpdate(to, from, next) {
     // 在当前路由改变，但是该组件被复用时调用
     // 举例来说，对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
     // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
     // 可以访问组件实例 `this`
-    this.fetchTestInfo()
-    next()
+    this.fetchTestInfo();
+    next();
   },
   methods: {
-    back () {
-      this.$router.go(-1)
+    back() {
+      this.$router.go(-1);
     },
-    fetchTestInfo () {
-      this.$http('get', '/online_test/' + this.test_id, {
-        test_id: this.test_id
+    fetchTestInfo() {
+      this.$http("get", "/online_test/" + this.postParams.test_id, {
+        test_id: this.postParams.test_id
       }).then(res => {
-        console.log(res)
-        this.testInfo.test_id = res.data.test_id
-        this.testInfo.title = res.data.title
-        this.testInfo.content = res.data.content
-        this.testInfo.start_time = res.data.start_time
-        this.testInfo.end_time = res.data.end_time
-        this.testInfo.file_id = res.data.file_id
-        this.testInfo.file_name = res.data.file_name
-      })
+        console.log(res);
+        this.testInfo.title = res.data.title;
+        this.testInfo.content = res.data.content;
+        this.testInfo.start_time = res.data.start_time;
+        this.testInfo.end_time = res.data.end_time;
+        this.testInfo.file_id = res.data.file_id;
+        this.testInfo.file_name = res.data.file_name;
+      });
     },
-    submit () {
-      this.$http('post', '/test_submit', {
-        action: 'post',
-        test_id: this.test_id,
-        content: this.content
-      })
+    // download() {
+    //   this.$http(
+    //     "get",
+    //     "/file",
+    //     (params = { file_id: this.testInfo.file_id }),
+    //     (config = {
+    //       contentType: "content-type:”application/x-download;charset=utf-8"
+    //     })
+    //   ).then(res => {});
+    // },
+    submitUpload() {
+      this.fileList = this.$refs.upload.uploadFiles;
+      if (this.fileList.length > 0) {
+        let abc = this.$refs.upload.submit();
+        console.log("abccc",abc)
+        this.$message({
+          message: "提交成功",
+          type: "success"
+        });
+        this.postParams.content = "";
+        this.fileList = [];
+      } else if (this.postParams.content !== "") {
+        this.$http("post", "/test_submit", this.postParams).then(res => {
+          if (res.data.status == 0) {
+            this.$message({
+              message: "提交成功",
+              type: "success"
+            });
+            this.postParams.content = "";
+          }
+        });
+      } else {
+        this.$message.error("真的要交白卷吗？~");
+      }
     },
-    submitUpload () {
-      this.$refs.upload.submit()
-    },
-    // 文件列表移除文件时的钩子
-    handleRemove (file, fileList) {
-      console.log(file, fileList)
-    },
-    // 点击文件列表中已上传的文件时的钩子
-    handlePreview (file) {
-      console.log(file)
+    handleSuccess(response, file, fileList){
+      console.log(response, file, fileList)
     }
   }
-}
+};
 </script>
 
 <style scoped>
@@ -147,10 +164,10 @@ export default {
   display: inline-block;
 }
 .file-title,
-.btn-file{
+.btn-file {
   display: inline-block;
 }
-.btn-file{
+.btn-file {
   font-size: 15px;
 }
 .file,

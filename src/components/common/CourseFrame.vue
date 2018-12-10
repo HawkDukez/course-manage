@@ -1,7 +1,7 @@
 <template>
     <div class="content-box">
-      <vTabs :course_id="course_id"></vTabs>
-<router-view></router-view>
+      <vTabs :course_id="course_id" :identity="identity"></vTabs>
+      <router-view></router-view>
     </div>
 </template>
 
@@ -11,6 +11,7 @@ export default {
   data() {
     return {
       course_id: this.$route.params.course,
+      identity: this.$route.params.identity
     };
   },
   components: {

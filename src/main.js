@@ -1,6 +1,7 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
+import store from './store'
 import App from './App'
 import router from './router'
 import ElementUI from 'element-ui'
@@ -12,6 +13,10 @@ import online_test from './util/online_test'
 import test from './util/online_test-test_id'
 import ass from './util/assignment-ass_id'
 import resource from './util/resource'
+import test_submit from './util/test_submit'
+import assign_submit from './util/assign_submit'
+import notice1 from './util/notice.1'
+
 import axios from 'axios'
 import request from './util/request'
 import 'element-ui/lib/theme-chalk/index.css'
@@ -31,6 +36,7 @@ Vue.prototype.$http = request
 // })
 new Vue({
   el: '#app',
+  store,
   router,
   render: h => h(App)
 })

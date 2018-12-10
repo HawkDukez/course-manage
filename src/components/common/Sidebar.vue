@@ -10,7 +10,12 @@
         <i class="fa fa-home fa-2x" aria-hidden="true"></i>
         <span>主页</span>
       </el-menu-item>
-      <el-menu-item v-for="course in courses" :key="course.section_id" :index="course.section_id" class="el-menu-item">
+      <el-menu-item
+        v-for="course in courses"
+        :key="course.section_id"
+        :index="course.section_id"
+        class="el-menu-item"
+      >
         <i class="fa fa-book fa-2x" aria-hidden="true"></i>
         <span>{{course.course_title}}</span>
       </el-menu-item>
@@ -19,22 +24,39 @@
 </template>
 <script>
 export default {
+  data() {
+    return {
+      identity: this.$route.params.identity
+    };
+  },
   props: ["courses"],
+
   methods: {
     fetchCourse(key, keyPath) {
       if (key != "home") {
-        this.$router.push({
-          name: "coursehome",
-          params: {
-            course: key
-          }
-        });
+        if (this.$route.params.identity == "student") {
+          this.$router.push({
+            name: "studentcoursehome",
+            params: {
+              course: key,
+              identity: "student"
+            }
+          });
+        } else {
+          this.$router.push({
+            name: "teachercoursehome",
+            params: {
+              course: key,
+              identity: "teacher"
+            }
+          });
+        }
       } else {
         this.$router.push("/home");
       }
     }
   }
-}
+};
 </script>
 <style scoped>
 .el-menu-vertical-demo {

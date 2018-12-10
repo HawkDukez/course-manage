@@ -21,12 +21,15 @@ export default {
   // },
   methods: {
     handleClick(tab, event) {
-      this.$router.push({
-        name: tab.name,
-        params: {
+      console.log(this.identity)
+      if (this.$route.params.identity == "student") {
+        this.$router.push({
+          name: tab.name,
+          params: {
             course: this.course_id
           }
-      });
+        });
+      }
     }
   }
 };

@@ -11,7 +11,7 @@
         style="margin-left: 60px; margin-top: 10px"
         v-for="(time,index) in courseInfo.time_slot"
         :key="index"
-      >周{{time.week_day}}	&ensp;第{{time.period}}节课	&ensp;{{time.start_time}}-{{time.end_time}}</p>
+      >周{{time.week_day}} &ensp;第{{time.period}}节课 &ensp;{{time.start_time}}-{{time.end_time}}</p>
       <h3 class="course-place">课室：</h3>
       <p
         style="margin-top: 5px; margin-left: 60px; margin-bottom: 10px"
@@ -22,6 +22,21 @@
       <el-card class="box-card" shadow="never" body-style="padding-left: 40px; padding-top: 20px">
         <div slot="header" class="clearfix" style="text-align: center">
           <span style="font-style: unset; font-size: 18px">通知</span>
+          <el-button type="text" @click="dialogFormVisible = true">发布</el-button>
+
+          <el-dialog title="发布公告" :visible.sync="dialogFormVisible">
+            <el-form :model="form">
+              <el-form-item label="公告标题" label-width="120px">
+                <el-input v-model="form.title" autocomplete="off"></el-input>
+              </el-form-item>
+              <el-form-item label="公告内容" label-width="120px">
+                <el-input v-model="form.content" type="textarea" :rows="5" autocomplete="off"></el-input>
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button type="primary" @click="handleAddNotice">确认发布</el-button>
+            </div>
+          </el-dialog>
         </div>
         <div v-for="notice in courseInfo.notices" :key="notice.notice_id" class="text item">
           <i class="fa fa-comment"></i>
@@ -37,7 +52,6 @@ export default {
   data() {
     return {
       course_id: this.$route.params.course,
-      identity: this.$route.params.identity,
       courseInfo: {
         notices: "",
         course_name: "",
@@ -50,7 +64,15 @@ export default {
         room: "",
         teacher_id: "",
         teacher_name: ""
+      },
+      dialogFormVisible: false,
+      form: {
+        action: "post",
+        sec_id: this.$route.params.course,
+        title: "",
+        content: ""
       }
+      // formLabelWidth: '120px'
     };
   },
   created() {
@@ -89,6 +111,20 @@ export default {
           teacher_name: res.data.teacher_name
         });
       });
+    },
+    handleAddNotice() {
+      this.$http("post", "/notice.1", this.form).then(res => {
+        if (res.data.status == 0) {
+          this.$alert("发布成功", "消息", {
+            confirmButtonText: "确定"
+          });
+          this.dialogFormVisible = false;
+        }else{
+            this.$alert("发布失败！！！", "消息", {
+            confirmButtonText: "确定"
+          });
+        }
+      });
     }
   }
 };
@@ -99,7 +135,6 @@ export default {
   text-align: left;
   padding-left: 0px;
   margin: 10px;
-
 }
 .course-name {
   margin-bottom: 20px;
@@ -158,5 +193,4 @@ export default {
   width: 100%;
   height: 100%;
 }
-
 </style>
